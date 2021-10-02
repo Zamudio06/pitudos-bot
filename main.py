@@ -29,6 +29,7 @@ class Player(commands.Cog):
         time.sleep(5)
         self.song_queue.pop(0)
         if len(self.song_queue) == 0:
+            self.leave(ctx)
             await ctx.send(embed=discord.Embed(title="Agregueme mas rolitas culo"))
         else:
             await self.play_song(ctx, self.song_queue[0])
@@ -67,6 +68,11 @@ class Player(commands.Cog):
 
     @commands.command()
     async def play(self, ctx, *, song=None):
+
+        if not self.inside:
+           await self.join(ctx)
+           time.sleep(2)
+
         if song is None:
             return await ctx.send(embed=discord.Embed(title="Debes incluir una rola, culo"))
 
@@ -175,4 +181,4 @@ async def setup():
 
 bot.loop.create_task(setup())
 keep_alive()
-bot.run('')
+bot.run('ODkzMzM2NjE0ODM3ODQ2MDM3.YVZ-jg.gTa8tFx422L2ByMV8SM68aexPwM')
