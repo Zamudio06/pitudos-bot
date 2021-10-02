@@ -1,6 +1,3 @@
-"""
-This is compressed into one file.
-"""
 from webserver import keep_alive
 
 import os
@@ -9,7 +6,6 @@ import youtube_dl
 import pafy
 import discord
 from discord.ext import commands
-
 
 bot = commands.Bot(command_prefix="%", description="Bot mamalon")
 
@@ -181,4 +177,4 @@ async def setup():
 
 bot.loop.create_task(setup())
 keep_alive()
-bot.run('ODkzMzM2NjE0ODM3ODQ2MDM3.YVZ-jg.qVEEUEDRwCQsRg4tlAZlbJbEnrs')
+bot.run('')
