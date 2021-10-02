@@ -17,6 +17,7 @@ class Player(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.song_queue = []
+        self.inside = False
 
         self.setup()
 
@@ -49,30 +50,29 @@ class Player(commands.Cog):
     @commands.command()
     async def join(self, ctx):
         if ctx.author.voice is None:
-            return await ctx.send(
-                "Conectese a un chat de voz, culo")
+            return await ctx.send(embed=discord.Embed(title="Conectese a un chat de voz, culo"))
 
         if ctx.voice_client is not None:
             await ctx.voice_client.disconnect()
 
         await ctx.author.voice.channel.connect()
+        self.inside = True
 
     @commands.command()
     async def leave(self, ctx):
         if ctx.voice_client is not None:
+            self.inside = False
+            await ctx.send(embed=discord.Embed(title="Hasta la proxima \nGracias por utilizarme, culo"))
             return await ctx.voice_client.disconnect()
-
-        await ctx.send("Adioossss")
 
     @commands.command()
     async def play(self, ctx, *, song=None):
         if song is None:
-            return await ctx.send("Debes incluir una rola, culo")
+            return await ctx.send(embed=discord.Embed(title="Debes incluir una rola, culo"))
 
-        if ctx.voice_client is None:
-            return await ctx.send("Metame al chat de voz, culo")
+        if not self.inside:
+            return await ctx.send(embed=discord.Embed(title="Error", description="Metame al chat de voz, culo"))
 
-        # handle song where song isn't url
         if not ("youtube.com/watch?" in song or "https://youtu.be/" in song):
             await ctx.send("Estoy buscando tu rolita wei, esperate poquito")
 
@@ -175,4 +175,4 @@ async def setup():
 
 bot.loop.create_task(setup())
 keep_alive()
-bot.run('')
+bot.run('ODkzMzM2NjE0ODM3ODQ2MDM3.YVZ-jg.5vEMctEzZQFbriIBqECbjfnfVH4')
