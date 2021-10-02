@@ -1,10 +1,8 @@
-from webserver import keep_alive
-
-import os
-import asyncio
 import youtube_dl
 import pafy
 import discord
+import time
+from webserver import keep_alive
 from discord.ext import commands
 
 bot = commands.Bot(command_prefix="%", description="Bot mamalon")
@@ -18,18 +16,21 @@ async def on_ready():
 class Player(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.song_queue = {}
+        self.song_queue = []
 
         self.setup()
 
     def setup(self):
         for guild in self.bot.guilds:
-            self.song_queue[guild.id] = []
+            self.song_queue = []
 
     async def check_queue(self, ctx):
-        if len(self.song_queue[ctx.guild.id]) > 0:
-            await self.play_song(ctx, self.song_queue[ctx.guild.id][0])
-            self.song_queue[ctx.guild.id].pop(0)
+        time.sleep(5)
+        self.song_queue.pop(0)
+        if len(self.song_queue) == 0:
+            await ctx.send(embed=discord.Embed(title="Agregueme mas rolitas culo"))
+        else:
+            await self.play_song(ctx, self.song_queue[0])
 
     async def search_song(self, amount, song, get_url=False):
         info = await self.bot.loop.run_in_executor(None, lambda: youtube_dl.YoutubeDL(
@@ -82,22 +83,20 @@ class Player(commands.Cog):
 
             song = result[0]
 
-        if ctx.voice_client.source is not None:
-            queue_len = len(self.song_queue[ctx.guild.id])
+        queue_len = len(self.song_queue)
 
-            if len(self.song_queue[ctx.guild.id]) == 0:
-              self.song_queue[ctx.guild.id] = []
+        if queue_len >= 10:
+            return await ctx.send(
+                "Solo puedo tener 10 rolitas")
 
-            if queue_len < 10:
-                self.song_queue[ctx.guild.id].append(song)
-                return await ctx.send(
-                    f"Estoy reproduciendo una rolita, pero te pongo en mi colita ;) \n{queue_len + 1}.")
+        self.song_queue.append(song)
 
-            else:
-                return await ctx.send(
-                    "Solo puedo tener 10 rolitas")
-        await self.play_song(ctx, song)
-        await ctx.send(f"Reproduciendo: {song}")
+        if len(self.song_queue) == 1:
+            await self.play_song(ctx, song)
+            await ctx.send(f"Reproduciendo: {song}")
+        else:
+            return await ctx.send(
+                f"Estoy reproduciendo una rolita, pero te pongo en mi colita ;) \n Posicion {queue_len + 1}")
 
     @commands.command()
     async def search(self, ctx, *, song=None):
@@ -143,7 +142,6 @@ class Player(commands.Cog):
 
         if ctx.author.voice.channel.id != ctx.voice_client.channel.id:
             return await ctx.send("No se robe al bot, culero")
-
 
         skip = True
 
