@@ -26,11 +26,10 @@ class Player(commands.Cog):
             self.song_queue = []
 
     async def check_queue(self, ctx):
-        time.sleep(5)
+        time.sleep(15)
         self.song_queue.pop(0)
         if len(self.song_queue) == 0:
-            self.leave(ctx)
-            await ctx.send(embed=discord.Embed(title="Agregueme mas rolitas culo"))
+            await self.leave(ctx)
         else:
             await self.play_song(ctx, self.song_queue[0])
 
@@ -44,6 +43,7 @@ class Player(commands.Cog):
 
     async def play_song(self, ctx, song):
         url = pafy.new(song).getbestaudio().url
+        await ctx.send(f"Reproduciendo: {song}")
         ctx.voice_client.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(url)),
                               after=lambda error: self.bot.loop.create_task(self.check_queue(ctx)))
         ctx.voice_client.source.volume = 0.5
@@ -57,6 +57,9 @@ class Player(commands.Cog):
             await ctx.voice_client.disconnect()
 
         await ctx.author.voice.channel.connect()
+        url = pafy.new('https://www.youtube.com/watch?v=w3QFThq8gQo').getbestaudio().url
+        ctx.voice_client.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(url)))
+        ctx.voice_client.source.volume = 0.5
         self.inside = True
 
     @commands.command()
@@ -64,6 +67,7 @@ class Player(commands.Cog):
         if ctx.voice_client is not None:
             self.inside = False
             await ctx.send(embed=discord.Embed(title="Hasta la proxima \nGracias por utilizarme, culo"))
+            self.song_queue = []
             return await ctx.voice_client.disconnect()
 
     @commands.command()
@@ -71,7 +75,6 @@ class Player(commands.Cog):
 
         if not self.inside:
            await self.join(ctx)
-           time.sleep(2)
 
         if song is None:
             return await ctx.send(embed=discord.Embed(title="Debes incluir una rola, culo"))
@@ -80,26 +83,25 @@ class Player(commands.Cog):
             return await ctx.send(embed=discord.Embed(title="Error", description="Metame al chat de voz, culo"))
 
         if not ("youtube.com/watch?" in song or "https://youtu.be/" in song):
-            await ctx.send("Estoy buscando tu rolita wei, esperate poquito")
+            await ctx.send(embed=discord.Embed(title="Estoy buscando tu rolita wei, esperate poquito"))
 
             result = await self.search_song(1, song, get_url=True)
 
             if result is None:
-                return await ctx.send("Perdona, no encontre la rolita :c")
+                return await ctx.send(embed=discord.Embed(title="Perdona, no encontre la rolita :c"))
 
             song = result[0]
 
         queue_len = len(self.song_queue)
 
         if queue_len >= 10:
-            return await ctx.send(
-                "Solo puedo tener 10 rolitas")
+            return await ctx.send(embed=discord.Embed(title=
+                "Solo puedo tener 10 rolitas"))
 
         self.song_queue.append(song)
 
         if len(self.song_queue) == 1:
             await self.play_song(ctx, song)
-            await ctx.send(f"Reproduciendo: {song}")
         else:
             return await ctx.send(
                 f"Estoy reproduciendo una rolita, pero te pongo en mi colita ;) \n Posicion {queue_len + 1}")
@@ -108,7 +110,7 @@ class Player(commands.Cog):
     async def search(self, ctx, *, song=None):
         if song is None: return await ctx.send("Olvidaste agregar la rola")
 
-        await ctx.send("Buscando tu rolita, esperame puto")
+        await ctx.send(embed=discord.Embed(title="Buscando tu rolita, esperame puto"))
 
         info = await self.search_song(5, song)
 
@@ -126,12 +128,12 @@ class Player(commands.Cog):
 
     @commands.command()
     async def queue(self, ctx):  # display the current guilds queue
-        if len(self.song_queue[ctx.guild.id]) == 0:
-            return await ctx.send("No hay rolitas en la cola")
+        if len(self.song_queue) == 0:
+            return await ctx.send(embed=discord.Embed(title="No hay rolitas en la cola"))
 
         embed = discord.Embed(title="Cola", description="", colour=discord.Colour.dark_gold())
         i = 1
-        for url in self.song_queue[ctx.guild.id]:
+        for url in self.song_queue:
             embed.description += f"{i}) {url}\n"
 
             i += 1
@@ -141,13 +143,13 @@ class Player(commands.Cog):
     @commands.command()
     async def skip(self, ctx):
         if ctx.voice_client is None:
-            return await ctx.send("No estoy reproduciendo nada, pendejo")
+            return await ctx.send(embed=discord.Embed(title="No estoy reproduciendo nada, pendejo"))
 
         if ctx.author.voice is None:
-            return await ctx.send("No estas en un canal wei")
+            return await ctx.send(embed=discord.Embed(title="No estas en un canal wei"))
 
         if ctx.author.voice.channel.id != ctx.voice_client.channel.id:
-            return await ctx.send("No se robe al bot, culero")
+            return await ctx.send(embed=discord.Embed(title="No se robe al bot, culero"))
 
         skip = True
 
@@ -157,21 +159,21 @@ class Player(commands.Cog):
     @commands.command()
     async def pause(self, ctx):
         if ctx.voice_client.is_paused():
-            return await ctx.send("Estoy pausado puto")
+            return await ctx.send(embed=discord.Embed(title="Estoy pausado puto"))
 
         ctx.voice_client.pause()
-        await ctx.send("Pausa")
+        await ctx.send(embed=discord.Embed(title="Pausa"))
 
     @commands.command()
     async def resume(self, ctx):
         if ctx.voice_client is None:
-            return await ctx.send("Conecteme a un Chat de voz, culo")
+            return await ctx.send(embed=discord.Embed(title="Conecteme a un Chat de voz, culo"))
 
         if not ctx.voice_client.is_paused():
-            return await ctx.send("No estoy pausado, pendejo")
+            return await ctx.send(embed=discord.Embed(title="No estoy pausado, pendejo"))
 
         ctx.voice_client.resume()
-        await ctx.send("Resumiendo")
+        await ctx.send(embed=discord.Embed(title="Resumiendo"))
 
 
 async def setup():
@@ -181,4 +183,4 @@ async def setup():
 
 bot.loop.create_task(setup())
 keep_alive()
-bot.run('ODkzMzM2NjE0ODM3ODQ2MDM3.YVZ-jg.gTa8tFx422L2ByMV8SM68aexPwM')
+bot.run('ODkzMzM2NjE0ODM3ODQ2MDM3.YVZ-jg.imSuyfm5qMtPEt_QTSgeZgBvIlA')
