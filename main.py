@@ -174,7 +174,18 @@ class Player(commands.Cog):
 
         ctx.voice_client.resume()
         await ctx.send(embed=discord.Embed(title="Resumiendo"))
+    
+     @commands.command()
+    async def stop(self, ctx):
+        if not ctx.voice_client:
+            return await ctx.send(embed=discord.Embed(title="No estoy conectado MI PA"))
 
+        if not ctx.voice_client.is_playing():
+            return await ctx.send(embed=discord.Embed(title="No estoy reproducioendo PA"))
+
+        ctx.voice_client.stop()
+        # Add queue clean up
+        return await ctx.send(embed=discord.Embed(title="Musica detenida MI PA"))
 
 async def setup():
     await bot.wait_until_ready()
